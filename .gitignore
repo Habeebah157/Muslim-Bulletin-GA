@@ -1,3 +1,9 @@
+<<<<<<< HEAD
+.env
+*.env
+.env*
+*.sql
+=======
 # Logs
 logs
 *.log
@@ -22,3 +28,4 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+>>>>>>> bbc65377e8d908ffa29df5bb878f78caefb229e3
