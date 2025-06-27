@@ -37,6 +37,7 @@ function formatTime(dateString) {
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
+import { useEffect } from "react";
 
 // Fix for default marker icons
 const defaultIcon = new L.Icon({
@@ -61,34 +62,50 @@ export default function EventDetail() {
   console.log("passedEvents:", passedEvents);
   const event = passedEvents.find((e) => String(e.id) === eventId);
 
-
-  // Sample event data
-  const eventData = {
-    title: `Community Meetup ${eventId}`,
-    date: "June 30, 2025",
-    time: "6:00 PM - 9:00 PM",
-    location: {
-      lat: 40.7128,
-      lng: -74.0060,
-      address: "123 Main St, New York, NY"
-    },
-    description: "Join us for an evening of networking, workshops, and fun activities with your local community members!",
-    host: "Jane Doe"
-  };
-
   const handleBack = () => navigate("/events");
 
-  const handleCommentSubmit = (e) => {
-    e.preventDefault();
-    if (newComment.trim()) {
-      setComments([...comments, { 
-        text: newComment, 
-        id: Date.now(),
-        timestamp: new Date().toLocaleString()
-      }]);
-      setNewComment("");
+const handleCommentSubmit = async (e) => {
+  e.preventDefault();
+
+  try {
+    const requestBody = {
+      question: newComment, // assuming newComment is the question
+      eventId
+    };
+
+    const res = await fetch(`http://localhost:9000/eventquestion`, {
+      method: "POST",
+      headers: {
+        token: localStorage.token,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(requestBody)
+    });
+
+    const returnjson = await res.json();
+    if (returnjson.success) {
+      alert("Question saved successfully");
+
+      // Add comment to UI
+      if (newComment.trim()) {
+        setComments(prev => [
+          ...prev,
+          {
+            text: newComment,
+            id: Date.now(),
+            timestamp: new Date().toLocaleString()
+          }
+        ]);
+        setNewComment("");
+      }
+    } else {
+      alert("Failed to save question");
     }
-  };
+  } catch (err) {
+    console.error("This is a problem", err);
+    alert("An error occurred while submitting your comment");
+  }
+};
 
   return (
     <div className="max-w-4xl mx-auto p-6 text-gray-800">
