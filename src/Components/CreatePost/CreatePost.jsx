@@ -16,7 +16,7 @@ export default function CreatePost() {
     try {
       const response = await fetch(
         `http://localhost:9000/ai/api/search?query=${encodeURIComponent(query)}&threshold=0.1`,
-        { headers: { token: localStorage.token } }
+        { headers: { token: localStorage.token } },
       );
       const data = await response.json();
       setSimilarQuestions(data);
@@ -35,17 +35,14 @@ export default function CreatePost() {
     e.preventDefault();
     try {
       const postData = { title, body };
-      const response = await fetch(
-        `http://localhost:9000/questions/question`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            token: localStorage.token,
-          },
-          body: JSON.stringify(postData),
-        }
-      );
+      const response = await fetch(`http://localhost:9000/questions/question`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          token: localStorage.token,
+        },
+        body: JSON.stringify(postData),
+      });
       const parseRes = await response.json();
       if (parseRes.success) {
         setInputs({ title: "", body: "" });

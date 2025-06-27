@@ -15,15 +15,19 @@ export default function QuestionPanel() {
     try {
       if (!window.confirm("Are you sure you want to delete this?")) return;
 
-      const response = await fetch(`http://localhost:9000/questions/${number}`, {
-        method: "DELETE",
-        headers: {
-          token: localStorage.token,
-          "Content-Type": "application/json",
+      const response = await fetch(
+        `http://localhost:9000/questions/${number}`,
+        {
+          method: "DELETE",
+          headers: {
+            token: localStorage.token,
+            "Content-Type": "application/json",
+          },
         },
-      });
+      );
 
-      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      if (!response.ok)
+        throw new Error(`HTTP error! status: ${response.status}`);
 
       navigate(`/question/`);
     } catch (err) {
@@ -66,17 +70,22 @@ export default function QuestionPanel() {
 
   const handleDeleteAnswer = async (answerId) => {
     try {
-      if (!window.confirm("Are you sure you want to delete this answer?")) return;
+      if (!window.confirm("Are you sure you want to delete this answer?"))
+        return;
 
-      const response = await fetch(`http://localhost:9000/answers/${answerId}`, {
-        method: "DELETE",
-        headers: {
-          token: localStorage.token,
-          "Content-Type": "application/json",
+      const response = await fetch(
+        `http://localhost:9000/answers/${answerId}`,
+        {
+          method: "DELETE",
+          headers: {
+            token: localStorage.token,
+            "Content-Type": "application/json",
+          },
         },
-      });
+      );
 
-      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      if (!response.ok)
+        throw new Error(`HTTP error! status: ${response.status}`);
 
       setAnswers(answers.filter((answer) => answer.id !== answerId));
     } catch (err) {
@@ -119,10 +128,11 @@ export default function QuestionPanel() {
           {
             method: "GET",
             headers: { token: localStorage.token },
-          }
+          },
         );
 
-        if (!commentaries.ok) throw new Error(`Answer fetch failed: ${commentaries.status}`);
+        if (!commentaries.ok)
+          throw new Error(`Answer fetch failed: ${commentaries.status}`);
 
         const getAnswers = await commentaries.json();
         setAnswers(getAnswers?.answers || []);
@@ -143,8 +153,16 @@ export default function QuestionPanel() {
           href="/question"
           className="inline-flex items-center gap-2 p-2 text-gray-600 hover:text-blue-600 transition-colors"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
-            stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
             <path d="M19 12H5" />
             <path d="M12 19l-7-7 7-7" />
           </svg>
@@ -172,18 +190,24 @@ export default function QuestionPanel() {
               <button
                 onClick={() =>
                   navigate(`/questions/${number}/edit`, {
-                    state: { fromtitle: question.title, frombody: question.body },
+                    state: {
+                      fromtitle: question.title,
+                      frombody: question.body,
+                    },
                   })
                 }
                 aria-label="Edit question"
               >
-                <FiEdit size={20} className="text-blue-600 hover:text-blue-800" />
+                <FiEdit
+                  size={20}
+                  className="text-blue-600 hover:text-blue-800"
+                />
               </button>
-              <button
-                onClick={handleDelete}
-                aria-label="Delete Question"
-              >
-                <FiTrash size={20} className="text-red-600 hover:text-red-800" />
+              <button onClick={handleDelete} aria-label="Delete Question">
+                <FiTrash
+                  size={20}
+                  className="text-red-600 hover:text-red-800"
+                />
               </button>
             </div>
           )}
@@ -300,10 +324,19 @@ export default function QuestionPanel() {
                   onClick={() => handleDeleteAnswer(answer.id)}
                   aria-label="Delete answer"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none"
-                    viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                    />
                   </svg>
                 </button>
               )}

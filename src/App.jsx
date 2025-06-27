@@ -68,7 +68,7 @@ function App() {
               <p className="text-center mt-5">
                 Your one-stop solution for all your community needs.
               </p>
-              <PrayerTime/>
+              <PrayerTime />
               {/* <Question /> */}
               <Community />
               <Businesses />
@@ -130,24 +130,16 @@ function App() {
         <Route
           path="profile/:userId"
           element={
-            isAuthenticated ? (
-              <UserProfile />
-            ) : (
-              <Navigate to="/" replace />
-            )
+            isAuthenticated ? <UserProfile /> : <Navigate to="/" replace />
           }
         />
         <Route
           path="/EventDetail/:eventId"
           element={
-            isAuthenticated ? (
-              <EventDetail />
-            ) : (
-              <Navigate to="/" replace />
-            )
+            isAuthenticated ? <EventDetail /> : <Navigate to="/" replace />
           }
         />
-        <Route 
+        <Route
           path="/createEvent"
           element={
             isAuthenticated ? (
@@ -155,7 +147,8 @@ function App() {
             ) : (
               <Navigate to="/" replace />
             )
-          }/>
+          }
+        />
 
         {/* <Route path="/events" element={props => <Events {...props} />} /> */}
         {/* <Route path="/businesses" render={props => <BusinessTab {...props}/>} /> */}

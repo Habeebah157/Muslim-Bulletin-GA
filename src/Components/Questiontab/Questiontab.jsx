@@ -8,26 +8,26 @@ import Chatbot from "../Chatbot/Chatbot";
 function timeAgo(dateString) {
   try {
     if (!dateString) return "some time ago";
-    
+
     // First try parsing as ISO string
     let date = parseISO(dateString);
     if (!isNaN(date.getTime())) {
       return formatDistanceToNow(date, { addSuffix: true });
     }
-    
+
     // If that fails, try creating new Date directly
     date = new Date(dateString);
     if (!isNaN(date.getTime())) {
       return formatDistanceToNow(date, { addSuffix: true });
     }
-    
+
     // If still failing, try common SQL timestamp format
-    const sqlDate = dateString.replace(' ', 'T') + 'Z';
+    const sqlDate = dateString.replace(" ", "T") + "Z";
     date = new Date(sqlDate);
     if (!isNaN(date.getTime())) {
       return formatDistanceToNow(date, { addSuffix: true });
     }
-    
+
     return "some time ago";
   } catch (error) {
     console.error("Error formatting date:", dateString, error);
@@ -73,12 +73,15 @@ export default function Questiontag() {
     try {
       const res = await fetch("http://localhost:9000/question_votes", {
         method: "POST",
-        headers: { "Content-Type": "application/json", token: localStorage.token },
+        headers: {
+          "Content-Type": "application/json",
+          token: localStorage.token,
+        },
         body: JSON.stringify({ question_id, vote }),
       });
       const data = await res.json();
       console.log("Vote response:", data);
-      console.log("VOTE SENT")
+      console.log("VOTE SENT");
       if (res.ok) {
         setReactions((prev) => ({
           ...prev,
@@ -160,7 +163,9 @@ export default function Questiontag() {
                   to={`/profile/${question.user_id}`}
                   className="hover:underline text-gray-700 hover:text-blue-600 transition-colors duration-200"
                 >
-                  <h5 className="text-sm font-semibold">{question.user_name}</h5>
+                  <h5 className="text-sm font-semibold">
+                    {question.user_name}
+                  </h5>
                 </Link>
                 <span className="text-xs text-gray-500 ml-auto">
                   {timeAgoText}
