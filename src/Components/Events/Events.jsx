@@ -101,6 +101,7 @@ export default function Events() {
               <div>
                 <Link
                   to={`/EventDetail/${event.id}`}
+                  state={{ eventData: events }}
                   className="text-xl font-semibold text-blue-700 hover:underline"
                 >
                   {event.title}
