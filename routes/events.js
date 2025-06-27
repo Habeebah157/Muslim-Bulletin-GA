@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const authorization = require("../middleware/authorization");
 const pool = require("../db.js");
-import { createEvent } from "ics";
+const { createEvent } = require('ics');
 
 router.get("/", authorization, async (req, res) => {
   try {
