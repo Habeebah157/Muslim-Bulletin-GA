@@ -31,14 +31,18 @@ export default function Community() {
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-10">
-      <h1 className="text-3xl font-semibold text-center mb-8">Community Events</h1>
+      <h1 className="text-3xl font-semibold text-center mb-8">
+        Community Events
+      </h1>
 
       {loading && <p className="text-center">Loading events...</p>}
       {error && <p className="text-center text-red-600">{error}</p>}
 
       <div className="flex overflow-x-auto gap-6 p-4 scrollbar-thin scrollbar-thumb-blue-500 scrollbar-track-blue-100">
         {events.length === 0 && !loading && (
-          <p className="text-center w-full text-blue-600 font-medium">No events found.</p>
+          <p className="text-center w-full text-blue-600 font-medium">
+            No events found.
+          </p>
         )}
         {events.map((event) => (
           <div
@@ -46,7 +50,9 @@ export default function Community() {
             className="flex-shrink-0 w-72 bg-white border border-blue-300 rounded-xl shadow-md hover:shadow-xl transition-shadow duration-300 flex flex-col justify-between p-5"
           >
             <div>
-              <h2 className="text-2xl font-bold text-blue-900 mb-3">{event.title}</h2>
+              <h2 className="text-2xl font-bold text-blue-900 mb-3">
+                {event.title}
+              </h2>
               <p className="text-blue-700 text-sm mb-4 leading-snug line-clamp-4">
                 {event.description}
               </p>

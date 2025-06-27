@@ -1,85 +1,85 @@
 import React, { useState } from "react";
 
-  const businessData = {
-    Cafes: [
-      {
-        id: 1,
-        name: "Subset Cafe",
-        category: "Coffee Shop",
-        distance: "0.3 miles",
-        address: "123 Main St, City, State",
-        contact: "123-456-7890",
-        hours: "Mon-Fri 2am–5pm",
-        image:
-          "https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=600&q=80",
-        shipping: true,
-      },
-      {
-        id: 2,
-        name: "Brew & Bean",
-        category: "Cafe",
-        distance: "0.5 miles",
-        address: "456 Bean St, City, State",
-        contact: "555-234-6789",
-        hours: "Daily 7am–7pm",
-        image:
-          "https://images.unsplash.com/photo-1511920170033-f8396924c348?auto=format&fit=crop&w=600&q=80",
-        shipping: false,
-      },
-    ],
-    Groceries: [
-      {
-        id: 3,
-        name: "GreenMart",
-        category: "Grocery Store",
-        distance: "1.2 miles",
-        address: "789 Market Rd, City, State",
-        contact: "987-654-3210",
-        hours: "Mon-Sun 8am–9pm",
-        image:
-          "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=600&q=80",
-        shipping: true,
-      },
-      {
-        id: 4,
-        name: "Fresh Basket",
-        category: "Organic Market",
-        distance: "0.9 miles",
-        address: "12 Orchard Ave, City, State",
-        contact: "321-654-0987",
-        hours: "Mon-Fri 10am–6pm",
-        image:
-          "https://images.unsplash.com/photo-1466637574441-749b8f19452f?auto=format&fit=crop&w=600&q=80",
-        shipping: false,
-      },
-    ],
-    Services: [
-      {
-        id: 5,
-        name: "FixIt Electronics",
-        category: "Electronics Repair",
-        distance: "2.1 miles",
-        address: "101 Circuit St, City, State",
-        contact: "888-777-6666",
-        hours: "Mon-Fri 9am–5pm",
-        image:
-          "https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=600&q=80",
-        shipping: false,
-      },
-      {
-        id: 6,
-        name: "Quick Clean",
-        category: "Dry Cleaning",
-        distance: "1.5 miles",
-        address: "202 Clean Ave, City, State",
-        contact: "222-333-4444",
-        hours: "Mon-Sat 9am–6pm",
-        image:
-          "https://images.unsplash.com/photo-1501594907352-04cda38ebc29?auto=format&fit=crop&w=600&q=80",
-        shipping: true,
-      },
-    ],
-  };
+const businessData = {
+  Cafes: [
+    {
+      id: 1,
+      name: "Subset Cafe",
+      category: "Coffee Shop",
+      distance: "0.3 miles",
+      address: "123 Main St, City, State",
+      contact: "123-456-7890",
+      hours: "Mon-Fri 2am–5pm",
+      image:
+        "https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=600&q=80",
+      shipping: true,
+    },
+    {
+      id: 2,
+      name: "Brew & Bean",
+      category: "Cafe",
+      distance: "0.5 miles",
+      address: "456 Bean St, City, State",
+      contact: "555-234-6789",
+      hours: "Daily 7am–7pm",
+      image:
+        "https://images.unsplash.com/photo-1511920170033-f8396924c348?auto=format&fit=crop&w=600&q=80",
+      shipping: false,
+    },
+  ],
+  Groceries: [
+    {
+      id: 3,
+      name: "GreenMart",
+      category: "Grocery Store",
+      distance: "1.2 miles",
+      address: "789 Market Rd, City, State",
+      contact: "987-654-3210",
+      hours: "Mon-Sun 8am–9pm",
+      image:
+        "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=600&q=80",
+      shipping: true,
+    },
+    {
+      id: 4,
+      name: "Fresh Basket",
+      category: "Organic Market",
+      distance: "0.9 miles",
+      address: "12 Orchard Ave, City, State",
+      contact: "321-654-0987",
+      hours: "Mon-Fri 10am–6pm",
+      image:
+        "https://images.unsplash.com/photo-1466637574441-749b8f19452f?auto=format&fit=crop&w=600&q=80",
+      shipping: false,
+    },
+  ],
+  Services: [
+    {
+      id: 5,
+      name: "FixIt Electronics",
+      category: "Electronics Repair",
+      distance: "2.1 miles",
+      address: "101 Circuit St, City, State",
+      contact: "888-777-6666",
+      hours: "Mon-Fri 9am–5pm",
+      image:
+        "https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=600&q=80",
+      shipping: false,
+    },
+    {
+      id: 6,
+      name: "Quick Clean",
+      category: "Dry Cleaning",
+      distance: "1.5 miles",
+      address: "202 Clean Ave, City, State",
+      contact: "222-333-4444",
+      hours: "Mon-Sat 9am–6pm",
+      image:
+        "https://images.unsplash.com/photo-1501594907352-04cda38ebc29?auto=format&fit=crop&w=600&q=80",
+      shipping: true,
+    },
+  ],
+};
 export function BusinessTab() {
   const [activeTab, setActiveTab] = useState("Cafes");
   const [searchQuery, setSearchQuery] = useState("");
@@ -87,7 +87,7 @@ export function BusinessTab() {
   const handleSearch = (e) => setSearchQuery(e.target.value.toLowerCase());
 
   const filteredBusinesses = businessData[activeTab].filter((business) =>
-    business.name.toLowerCase().includes(searchQuery)
+    business.name.toLowerCase().includes(searchQuery),
   );
 
   return (
@@ -137,7 +137,7 @@ export function BusinessTab() {
               </p>
               <a
                 href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-                  business.address
+                  business.address,
                 )}`}
                 target="_blank"
                 rel="noopener noreferrer"

@@ -5,19 +5,22 @@ export default function Businesses() {
     {
       id: 1,
       name: "Halal Grill & Dine",
-      description: "Serving fresh halal meals with love. Family-friendly and delicious!",
+      description:
+        "Serving fresh halal meals with love. Family-friendly and delicious!",
       image: "https://via.placeholder.com/256x160?text=Halal+Grill",
     },
     {
       id: 2,
       name: "Hijab Boutique",
-      description: "Your go-to shop for modest fashion, hijabs, and accessories.",
+      description:
+        "Your go-to shop for modest fashion, hijabs, and accessories.",
       image: "https://via.placeholder.com/256x160?text=Boutique",
     },
     {
       id: 3,
       name: "Noor Bookstore",
-      description: "Islamic books, prayer mats, and educational resources for all ages.",
+      description:
+        "Islamic books, prayer mats, and educational resources for all ages.",
       image: "https://via.placeholder.com/256x160?text=Books",
     },
     {
@@ -53,7 +56,9 @@ export default function Businesses() {
             />
             <div className="p-4 flex flex-col justify-between h-56">
               <div>
-                <h2 className="text-lg font-bold text-blue-900 mb-2">{biz.name}</h2>
+                <h2 className="text-lg font-bold text-blue-900 mb-2">
+                  {biz.name}
+                </h2>
                 <p className="text-sm text-blue-700 leading-snug line-clamp-4">
                   {biz.description}
                 </p>

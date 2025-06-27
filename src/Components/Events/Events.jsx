@@ -1,22 +1,22 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate , Link } from 'react-router-dom';
+import React, { useEffect, useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
 
 export default function Events() {
   const navigate = useNavigate();
   const [events, setEvents] = useState([]);
   const [filtered, setFiltered] = useState([]);
-  const [tab, setTab] = useState('All');
+  const [tab, setTab] = useState("All");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   const handleClick = () => {
-    navigate('/createEvent');
+    navigate("/createEvent");
   };
 
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        const res = await fetch('http://localhost:9000/events/', {
+        const res = await fetch("http://localhost:9000/events/", {
           headers: {
             token: localStorage.token,
           },
@@ -25,10 +25,10 @@ export default function Events() {
         if (data.success) {
           setEvents(data.events);
         } else {
-          setError(data.message || 'Failed to load events');
+          setError(data.message || "Failed to load events");
         }
       } catch (err) {
-        setError('Network error', err.message);
+        setError("Network error", err.message);
       } finally {
         setLoading(false);
       }
@@ -39,19 +39,21 @@ export default function Events() {
 
   useEffect(() => {
     const now = new Date();
-    const todayStr = now.toISOString().split('T')[0];
+    const todayStr = now.toISOString().split("T")[0];
 
     const filteredEvents = {
       All: events,
-      Today: events.filter(e => new Date(e.start_time).toISOString().split('T')[0] === todayStr),
-      Upcoming: events.filter(e => new Date(e.start_time) > now),
-      Past: events.filter(e => new Date(e.start_time) < now),
+      Today: events.filter(
+        (e) => new Date(e.start_time).toISOString().split("T")[0] === todayStr,
+      ),
+      Upcoming: events.filter((e) => new Date(e.start_time) > now),
+      Past: events.filter((e) => new Date(e.start_time) < now),
     };
 
     setFiltered(filteredEvents[tab]);
   }, [tab, events]);
 
-  const tabs = ['All', 'Today', 'Upcoming', 'Past'];
+  const tabs = ["All", "Today", "Upcoming", "Past"];
 
   return (
     <div className="p-6 max-w-5xl mx-auto">
@@ -74,8 +76,8 @@ export default function Events() {
             onClick={() => setTab(t)}
             className={`px-4 py-1 rounded-t text-sm font-medium ${
               tab === t
-                ? 'bg-blue-600 text-white'
-                : 'text-blue-600 hover:bg-blue-100'
+                ? "bg-blue-600 text-white"
+                : "text-blue-600 hover:bg-blue-100"
             }`}
           >
             {t}
@@ -107,15 +109,15 @@ export default function Events() {
                   {event.title}
                 </Link>
                 <p className="text-sm text-gray-500">
-                  {new Date(event.start_time).toLocaleDateString()} &bull;{' '}
+                  {new Date(event.start_time).toLocaleDateString()} &bull;{" "}
                   {new Date(event.start_time).toLocaleTimeString([], {
-                    hour: '2-digit',
-                    minute: '2-digit',
+                    hour: "2-digit",
+                    minute: "2-digit",
                   })}
                   {event.end_time &&
                     ` - ${new Date(event.end_time).toLocaleTimeString([], {
-                      hour: '2-digit',
-                      minute: '2-digit',
+                      hour: "2-digit",
+                      minute: "2-digit",
                     })}`}
                 </p>
                 <p className="text-sm text-gray-700 mt-1">

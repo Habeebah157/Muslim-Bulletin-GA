@@ -1,53 +1,52 @@
-import React, { useState } from "react";
-import { useParams, useNavigate,useLocation } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
+import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
+import markerIcon from "leaflet/dist/images/marker-icon.png";
+import markerShadow from "leaflet/dist/images/marker-shadow.png";
+import RSVP from "../RSVP/RSVP";
 
-
-// const { eventId } = useParams();
-//   const location = useLocation();
-
-//   // Get the array of events
-//   const events = location.state?.eventData || [];
-
-//   // Find the specific event
-//   const event = events.find((e) => String(e.id) === eventId);
-
-//   if (!event) {
-//     return <div>Event not found</div>; // Optional: add fallback UI
-//   }
-
-function formatTime(dateString) {
-  const date = new Date(dateString);
-  let hours = date.getHours();
-  const minutes = date.getMinutes();
-
-  const ampm = hours >= 12 ? 'PM' : 'AM';
-  hours = hours % 12;
-  hours = hours ? hours : 12; // convert 0 to 12
-
-  const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes;
-
-  return `${hours}:${formattedMinutes} ${ampm}`;
-}
-
-// Import marker images directly
-import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
-import markerIcon from 'leaflet/dist/images/marker-icon.png';
-import markerShadow from 'leaflet/dist/images/marker-shadow.png';
-
-// Fix for default marker icons
-const defaultIcon = new L.Icon({
+const eventMarkerIcon = new L.Icon({
   iconRetinaUrl: markerIcon2x,
   iconUrl: markerIcon,
   shadowUrl: markerShadow,
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-  shadowSize: [41, 41]
+  iconSize: [30, 45],
+  iconAnchor: [15, 45],
+  popupAnchor: [1, -40],
+  shadowSize: [45, 45],
 });
+
+function formatTime(dateString) {
+  if (!dateString) return "";
+  const date = new Date(dateString);
+  let hours = date.getHours();
+  const minutes = date.getMinutes();
+  const ampm = hours >= 12 ? "PM" : "AM";
+  hours = hours % 12 || 12;
+  const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes;
+  return `${hours}:${formattedMinutes} ${ampm}`;
+}
+
+function formatDateWithOrdinal(dateString) {
+  const date = new Date(dateString);
+  const day = date.getDate();
+  const month = date.toLocaleString("en-US", { month: "long" });
+  const year = date.getFullYear();
+
+  const suffix =
+    day === 1 || day === 21 || day === 31
+      ? "st"
+      : day === 2 || day === 22
+      ? "nd"
+      : day === 3 || day === 23
+      ? "rd"
+      : "th";
+
+  return `${month} ${day}${suffix}, ${year}`;
+}
 
 export default function EventDetail() {
   const { eventId } = useParams();
@@ -55,199 +54,341 @@ export default function EventDetail() {
   const navigate = useNavigate();
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
+  const [replies, setReplies] = useState({});
+  const [replyInputs, setReplyInputs] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
 
   const passedEvents = location.state?.eventData || [];
-  console.log("location:", location);
-  console.log("passedEvents:", passedEvents);
   const event = passedEvents.find((e) => String(e.id) === eventId);
 
-
-  // Sample event data
-  const eventData = {
-    title: `Community Meetup ${eventId}`,
-    date: "June 30, 2025",
-    time: "6:00 PM - 9:00 PM",
-    location: {
-      lat: 40.7128,
-      lng: -74.0060,
-      address: "123 Main St, New York, NY"
-    },
-    description: "Join us for an evening of networking, workshops, and fun activities with your local community members!",
-    host: "Jane Doe"
-  };
+  useEffect(() => {
+    const fetchQuestions = async () => {
+      setIsLoading(true);
+      try {
+        const res = await fetch(`http://localhost:9000/eventquestion/${eventId}`, {
+          method: "GET",
+          headers: { token: localStorage.token },
+        });
+        const parseRes = await res.json();
+        setComments(parseRes.data || []);
+      } catch (err) {
+        console.error("Error fetching questions:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchQuestions();
+  }, [eventId]);
 
   const handleBack = () => navigate("/events");
 
-  const handleCommentSubmit = (e) => {
+  const handleCommentSubmit = async (e) => {
     e.preventDefault();
-    if (newComment.trim()) {
-      setComments([...comments, { 
-        text: newComment, 
-        id: Date.now(),
-        timestamp: new Date().toLocaleString()
-      }]);
-      setNewComment("");
+    if (!newComment.trim()) return;
+
+    try {
+      setIsLoading(true);
+      const res = await fetch(`http://localhost:9000/eventquestion`, {
+        method: "POST",
+        headers: {
+          token: localStorage.token,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ question: newComment, event_id: eventId }),
+      });
+      const returnjson = await res.json();
+      if (returnjson.success) {
+        setComments((prev) => [
+          ...prev,
+          {
+            question: newComment,
+            id: Date.now(),
+            created_at: new Date().toISOString(),
+            user_name: returnjson.user_name || "Anonymous",
+          },
+        ]);
+        setNewComment("");
+      }
+    } catch (err) {
+      console.error("Error submitting comment:", err);
+    } finally {
+      setIsLoading(false);
     }
   };
 
+  const handleInputChange = (commentId, value) => {
+    setReplyInputs((prev) => ({ ...prev, [commentId]: value }));
+  };
+
+  const handleReplySubmit = (e, commentId) => {
+    e.preventDefault();
+    const replyText = replyInputs[commentId]?.trim();
+    if (!replyText) return;
+
+    setReplies((prev) => ({
+      ...prev,
+      [commentId]: [...(prev[commentId] || []), replyText],
+    }));
+    setReplyInputs((prev) => ({ ...prev, [commentId]: "" }));
+  };
+
+  if (!event) {
+    return (
+      <section className="max-w-4xl mx-auto p-6 text-center">
+        <article className="bg-white rounded-2xl p-8 shadow-lg border border-gray-200">
+          <h1 className="text-3xl font-extrabold text-gray-800 mb-6">Event Not Found</h1>
+          <button
+            onClick={handleBack}
+            className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl shadow-md hover:from-indigo-600 hover:to-blue-600 transition-transform transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-indigo-300"
+          >
+            ← Back to Events
+          </button>
+        </article>
+      </section>
+    );
+  }
+
   return (
-    <div className="max-w-4xl mx-auto p-6 text-gray-800">
+    <section className="max-w-6xl mx-auto p-6 space-y-6">
       {/* Back Button */}
       <button
         onClick={handleBack}
-        className="mb-6 flex items-center text-blue-600 hover:text-blue-800 transition-colors"
+        aria-label="Go back to events list"
+        className="inline-flex items-center text-indigo-600 hover:text-indigo-800 transition-colors font-semibold mb-6"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
-          <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className="h-5 w-5 mr-1"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          strokeWidth={2}
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
         </svg>
         Back to Events
       </button>
 
-      {/* Event Header */}
-      <div className="bg-white rounded-xl p-6 shadow-md mb-8 border border-gray-200">
-        <h1 className="text-3xl font-bold mb-3 text-blue-700">🎉 {event.title}</h1>
-        
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-          <div className="flex items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
-            <span>{eventData.date}</span>
-          </div>
-          
-        <div className="flex items-center space-x-4">
-  <div className="flex items-center">
-    {/* Start time icon */}
-    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-    </svg>
-    <span>{formatTime(event.start_time)}</span>
-  </div>
+      {/* Two-column layout: RSVP on left, main info on right */}
+      <div className="flex flex-col md:flex-row gap-10">
+        {/* Left Column: RSVP */}
+        <aside className="md:w-1/3 sticky top-20 self-start bg-white rounded-3xl shadow-xl p-8 border border-gray-100">
+          <RSVP eventId={eventId} />
+          <button
+    className="mt-6 w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg shadow"
+    type="button"
+  >
+    Add to Google Calendar
+  </button>
+        </aside>
 
-  <div className="flex items-center">
-    {/* End time icon */}
-    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-    </svg>
-    <span>{formatTime(event.end_time)}</span>
-  </div>
-</div>
-          <div className="flex items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-            </svg>
-            <span>{event.location}</span>
-          </div>
-        </div>
 
-        <div className="flex items-center text-sm text-gray-600">
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-          </svg>
-          Hosted by: {eventData.host}
-        </div>
-      </div>
+        {/* Right Column: Event Details + Comments */}
+        <article className="md:w-2/3 space-y-10 bg-white rounded-3xl shadow-xl p-8 border border-gray-100">
+          {/* Event Header */}
+          <header className="flex flex-col md:flex-row md:justify-between md:items-center mb-6">
+            <h1 className="text-4xl font-extrabold text-gray-900">{event.title}</h1>
+            <span className="mt-3 md:mt-0 inline-block px-5 py-2 bg-indigo-100 text-indigo-700 rounded-full font-semibold tracking-wide text-sm shadow-sm">
+              {event.event_type || "Event"}
+            </span>
+          </header>
 
-      {/* Description */}
-      <div className="bg-white rounded-xl p-6 mb-8 shadow-sm border border-gray-200">
-        <h2 className="text-xl font-semibold mb-4 text-blue-700 flex items-center">
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-          </svg>
-          Event Description
-        </h2>
-        <p className="text-gray-700 leading-relaxed">
-          {event.description}
-        </p>
-      </div>
-
-      {/* Map Section */}
-      <div className="bg-white rounded-xl p-6 mb-8 shadow-sm border border-gray-200">
-        <h2 className="text-xl font-semibold mb-4 text-blue-700 flex items-center">
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
-          </svg>
-          Location Map
-        </h2>
-        
-        <div className="h-80 rounded-lg overflow-hidden border border-gray-300">
-          <MapContainer
-            center={[eventData.location.lat, eventData.location.lng]}
-            zoom={15}
-            scrollWheelZoom={true}
-            style={{ height: "100%", width: "100%" }}
-          >
-            <TileLayer
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            />
-            <Marker 
-              position={[eventData.location.lat, eventData.location.lng]} 
-              icon={defaultIcon}
-            >
-              <Popup className="font-sans">
-                <div className="font-bold text-blue-700">Event Location</div>
-                <div className="text-sm">{eventData.location.address}</div>
-              </Popup>
-            </Marker>
-          </MapContainer>
-        </div>
-        
-        <div className="mt-3 text-sm text-gray-600">
-          <p>Click on the marker for more details</p>
-        </div>
-      </div>
-
-      {/* Comments Section */}
-      <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-        <h2 className="text-xl font-semibold mb-4 text-blue-700 flex items-center">
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-          </svg>
-          Discussion ({comments.length})
-        </h2>
-
-        {comments.length === 0 ? (
-          <div className="text-center py-8 text-gray-500">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mx-auto mb-3 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-            </svg>
-            <p>No comments yet. Be the first to share your thoughts!</p>
-          </div>
-        ) : (
-          <div className="space-y-4 mb-6">
-            {comments.map(comment => (
-              <div key={comment.id} className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                <div className="flex justify-between items-start mb-1">
-                  <span className="font-medium text-blue-600">Anonymous</span>
-                  <span className="text-xs text-gray-500">{comment.timestamp}</span>
-                </div>
-                <p className="text-gray-700">{comment.text}</p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-gray-700">
+            {/* Date */}
+            <div className="flex items-center space-x-4">
+              <div className="p-3 bg-indigo-50 rounded-xl text-indigo-600">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-7 w-7"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                  />
+                </svg>
               </div>
-            ))}
-          </div>
-        )}
+              <div>
+                <p className="text-xs uppercase font-semibold tracking-wide">Date</p>
+                <p className="text-lg font-semibold">{formatDateWithOrdinal(event.start_time)}</p>
+              </div>
+            </div>
 
-        <form onSubmit={handleCommentSubmit} className="mt-4">
-          <div className="flex flex-col space-y-3">
-            <textarea
-              value={newComment}
-              onChange={(e) => setNewComment(e.target.value)}
-              placeholder="Share your thoughts about this event..."
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              rows={3}
-            />
-            <button
-              type="submit"
-              disabled={!newComment.trim()}
-              className="self-end px-6 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              Post Comment
-            </button>
+            {/* Time */}
+            <div className="flex items-center space-x-4">
+              <div className="p-3 bg-indigo-50 rounded-xl text-indigo-600">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-7 w-7"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+              </div>
+              <div>
+                <p className="text-xs uppercase font-semibold tracking-wide">Time</p>
+                <p className="text-lg font-semibold">
+                  {formatTime(event.start_time)} - {formatTime(event.end_time)}
+                </p>
+              </div>
+            </div>
+
+            {/* Location */}
+            <div className="flex items-center space-x-4">
+              <div className="p-3 bg-indigo-50 rounded-xl text-indigo-600">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-7 w-7"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M17.657 16.657L13 21.314l-4.657-4.657a8 8 0 1111.314 0z"
+                  />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                  />
+                </svg>
+              </div>
+              <div>
+                <p className="text-xs uppercase font-semibold tracking-wide">Location</p>
+                <address className="not-italic text-lg font-semibold">{event.location || "Online/To be announced"}</address>
+              </div>
+            </div>
           </div>
-        </form>
+
+          {/* Description */}
+          <section className="mt-8 prose prose-indigo max-w-none text-gray-800">
+            <h2 className="text-2xl font-bold mb-3">About the Event</h2>
+            <p>{event.description || "No description provided for this event."}</p>
+          </section>
+
+          {/* Map */}
+          {event.latitude && event.longitude && (
+            <div className="mt-10 rounded-xl overflow-hidden shadow-lg">
+              <MapContainer
+                center={[event.latitude, event.longitude]}
+                zoom={13}
+                scrollWheelZoom={false}
+                style={{ height: "300px", width: "100%" }}
+                aria-label="Event Location Map"
+              >
+                <TileLayer
+                  attribution='&copy; <a href="https://osm.org/copyright">OpenStreetMap</a> contributors'
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                />
+                <Marker position={[event.latitude, event.longitude]} icon={eventMarkerIcon}>
+                  <Popup>{event.title}</Popup>
+                </Marker>
+              </MapContainer>
+            </div>
+          )}
+
+          {/* Questions & Comments */}
+          <section className="mt-12">
+            <h2 className="text-3xl font-bold mb-6 border-b-2 border-indigo-300 pb-2">
+              Questions & Comments
+            </h2>
+
+            {/* New Comment Input */}
+            <form onSubmit={handleCommentSubmit} className="mb-8">
+              <textarea
+                aria-label="Add a comment or question"
+                placeholder="Have a question or comment? Write it here..."
+                className="w-full rounded-lg border border-gray-300 p-3 resize-none focus:outline-none focus:ring-2 focus:ring-indigo-500 transition"
+                rows={3}
+                value={newComment}
+                onChange={(e) => setNewComment(e.target.value)}
+                disabled={isLoading}
+                required
+              />
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="mt-3 px-6 py-2 bg-indigo-600 text-white rounded-lg shadow hover:bg-indigo-700 transition"
+              >
+                {isLoading ? "Submitting..." : "Submit"}
+              </button>
+            </form>
+
+            {/* Comments List */}
+            <div className="space-y-6">
+              {comments.length === 0 && (
+                <p className="text-gray-500 italic">No questions or comments yet. Be the first!</p>
+              )}
+              {comments.map(({ id, question, created_at, user_name }) => (
+                <article
+                  key={id}
+                  className="p-5 border rounded-lg shadow-sm bg-gray-50 hover:shadow-md transition-shadow"
+                  tabIndex={0}
+                  aria-label={`Comment by ${user_name} on ${new Date(created_at).toLocaleDateString()}`}
+                >
+                  <div className="flex justify-between items-center mb-2">
+                    <h3 className="font-semibold text-indigo-800">{user_name || "Anonymous"}</h3>
+                    <time
+                      dateTime={created_at}
+                      className="text-xs text-gray-500 font-mono"
+                      title={new Date(created_at).toLocaleString()}
+                    >
+                      {new Date(created_at).toLocaleDateString()}
+                    </time>
+                  </div>
+                  <p className="mb-4">{question}</p>
+
+                  {/* Replies */}
+                  <div className="ml-6 space-y-3">
+                    {(replies[id] || []).map((reply, index) => (
+                      <div
+                        key={index}
+                        className="px-4 py-2 bg-indigo-100 rounded-lg text-indigo-900 text-sm shadow-sm"
+                        aria-label={`Reply ${index + 1} to comment by ${user_name}`}
+                      >
+                        {reply}
+                      </div>
+                    ))}
+
+                    {/* Reply Input */}
+                    <form onSubmit={(e) => handleReplySubmit(e, id)} className="mt-2 flex gap-3">
+                      <input
+                        type="text"
+                        aria-label={`Reply to comment by ${user_name}`}
+                        className="flex-grow rounded-lg border border-gray-300 p-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                        value={replyInputs[id] || ""}
+                        onChange={(e) => handleInputChange(id, e.target.value)}
+                        placeholder="Write a reply..."
+                      />
+                      <button
+                        type="submit"
+                        className="px-4 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition"
+                        disabled={!replyInputs[id]?.trim()}
+                      >
+                        Reply
+                      </button>
+                    </form>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </section>
+        </article>
       </div>
-    </div>
+    </section>
   );
 }

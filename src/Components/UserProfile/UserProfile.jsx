@@ -19,7 +19,7 @@ export default function UserProfile() {
             headers: {
               token: localStorage.token,
             },
-          }
+          },
         );
 
         if (!res.ok) {
@@ -56,7 +56,9 @@ export default function UserProfile() {
     <div className="max-w-3xl mx-auto mt-16 px-4 sm:px-6 lg:px-8 font-sans text-gray-900">
       {/* Back Button */}
       <button
-        onClick={() => (window.location.href = "http://localhost:5174/question")}
+        onClick={() =>
+          (window.location.href = "http://localhost:5174/question")
+        }
         className="mb-6 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
       >
         ← Back to Questions
@@ -70,7 +72,9 @@ export default function UserProfile() {
       </h2>
 
       {questions.length === 0 ? (
-        <p className="italic text-gray-500">No questions found for this user.</p>
+        <p className="italic text-gray-500">
+          No questions found for this user.
+        </p>
       ) : (
         <ul className="space-y-6">
           {questions.map((q) => (
@@ -86,7 +90,9 @@ export default function UserProfile() {
               </Link>
               <p className="text-gray-700 mt-2 mb-4">{q.body}</p>
               <div className="flex justify-between text-sm text-gray-500">
-                <span>Created at: {new Date(q.created_at).toLocaleDateString()}</span>
+                <span>
+                  Created at: {new Date(q.created_at).toLocaleDateString()}
+                </span>
                 <span className="font-semibold text-gray-800">
                   Answers: {q.answer_count}
                 </span>
