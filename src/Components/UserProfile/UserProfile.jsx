@@ -6,6 +6,7 @@ export default function UserProfile() {
   const [questions, setQuestions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [notAuthorized, setNotAuthorized] = useState(false); // ✅ fix this
 
   useEffect(() => {
     async function fetchUserQuestions() {
@@ -19,11 +20,12 @@ export default function UserProfile() {
             headers: {
               token: localStorage.token,
             },
-          },
+          }
         );
 
         if (!res.ok) {
-          throw new Error(`HTTP error! status: ${res.status}`);
+          setNotAuthorized(true); // ✅ fix state setter
+          throw new Error(`You should not have access to this`);
         }
 
         const data = await res.json();
@@ -38,20 +40,35 @@ export default function UserProfile() {
     fetchUserQuestions();
   }, [userId]);
 
-  if (loading)
+  // ✅ Handle loading state
+  if (loading) {
     return (
       <div className="max-w-3xl mx-auto mt-20 text-center text-gray-600">
         Loading questions...
       </div>
     );
+  }
 
-  if (error)
+  // ✅ Show unauthorized screen
+  if (notAuthorized) {
+    return (
+      <div className="max-w-3xl mx-auto mt-20 text-center text-red-600 font-semibold">
+        <h1>Not Authorized</h1>
+        <p>Are you the owner of this profile?</p>
+      </div>
+    );
+  }
+
+  // ✅ Show error
+  if (error) {
     return (
       <div className="max-w-3xl mx-auto mt-20 text-center text-red-600 font-semibold">
         Error: {error}
       </div>
     );
+  }
 
+  // ✅ Normal content
   return (
     <div className="max-w-3xl mx-auto mt-16 px-4 sm:px-6 lg:px-8 font-sans text-gray-900">
       {/* Back Button */}
