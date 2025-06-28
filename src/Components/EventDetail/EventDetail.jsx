@@ -96,7 +96,6 @@ export default function EventDetail() {
   const passedEvents = location.state?.eventData || [];
   const event = passedEvents.find((e) => String(e.id) === eventId);
 
-<<<<<<< HEAD
   const handleBack = () => navigate("/events");
 
 const handleCommentSubmit = async (e) => {
@@ -135,60 +134,6 @@ const handleCommentSubmit = async (e) => {
       }
     } else {
       alert("Failed to save question");
-=======
-  useEffect(() => {
-    const fetchQuestions = async () => {
-      setIsLoading(true);
-      try {
-        const res = await fetch(`http://localhost:9000/eventquestion/${eventId}`, {
-          method: "GET",
-          headers: { token: localStorage.token },
-        });
-        const parseRes = await res.json();
-        setComments(parseRes.data || []);
-      } catch (err) {
-        console.error("Error fetching questions:", err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchQuestions();
-  }, [eventId]);
-
-  const handleBack = () => navigate("/events");
-
-  const handleCommentSubmit = async (e) => {
-    e.preventDefault();
-    if (!newComment.trim()) return;
-
-    try {
-      setIsLoading(true);
-      const res = await fetch(`http://localhost:9000/eventquestion`, {
-        method: "POST",
-        headers: {
-          token: localStorage.token,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ question: newComment, event_id: eventId }),
-      });
-      const returnjson = await res.json();
-      if (returnjson.success) {
-        setComments((prev) => [
-          ...prev,
-          {
-            question: newComment,
-            id: Date.now(),
-            created_at: new Date().toISOString(),
-            user_name: returnjson.user_name || "Anonymous",
-          },
-        ]);
-        setNewComment("");
-      }
-    } catch (err) {
-      console.error("Error submitting comment:", err);
-    } finally {
-      setIsLoading(false);
->>>>>>> 2b1e4881ae6616b3a8568d732fa9da40df8958c7
     }
   } catch (err) {
     console.error("This is a problem", err);
