@@ -9,7 +9,46 @@ import markerIcon from "leaflet/dist/images/marker-icon.png";
 import markerShadow from "leaflet/dist/images/marker-shadow.png";
 import RSVP from "../RSVP/RSVP";
 
+<<<<<<< HEAD
+
+// const { eventId } = useParams();
+//   const location = useLocation();
+
+//   // Get the array of events
+//   const events = location.state?.eventData || [];
+
+//   // Find the specific event
+//   const event = events.find((e) => String(e.id) === eventId);
+
+//   if (!event) {
+//     return <div>Event not found</div>; // Optional: add fallback UI
+//   }
+
+function formatTime(dateString) {
+  const date = new Date(dateString);
+  let hours = date.getHours();
+  const minutes = date.getMinutes();
+
+  const ampm = hours >= 12 ? 'PM' : 'AM';
+  hours = hours % 12;
+  hours = hours ? hours : 12; // convert 0 to 12
+
+  const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes;
+
+  return `${hours}:${formattedMinutes} ${ampm}`;
+}
+
+// Import marker images directly
+import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
+import markerIcon from 'leaflet/dist/images/marker-icon.png';
+import markerShadow from 'leaflet/dist/images/marker-shadow.png';
+import { useEffect } from "react";
+
+// Fix for default marker icons
+const defaultIcon = new L.Icon({
+=======
 const eventMarkerIcon = new L.Icon({
+>>>>>>> 2b1e4881ae6616b3a8568d732fa9da40df8958c7
   iconRetinaUrl: markerIcon2x,
   iconUrl: markerIcon,
   shadowUrl: markerShadow,
@@ -61,6 +100,46 @@ export default function EventDetail() {
   const passedEvents = location.state?.eventData || [];
   const event = passedEvents.find((e) => String(e.id) === eventId);
 
+<<<<<<< HEAD
+  const handleBack = () => navigate("/events");
+
+const handleCommentSubmit = async (e) => {
+  e.preventDefault();
+
+  try {
+    const requestBody = {
+      question: newComment, // assuming newComment is the question
+      eventId
+    };
+
+    const res = await fetch(`http://localhost:9000/eventquestion`, {
+      method: "POST",
+      headers: {
+        token: localStorage.token,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(requestBody)
+    });
+
+    const returnjson = await res.json();
+    if (returnjson.success) {
+      alert("Question saved successfully");
+
+      // Add comment to UI
+      if (newComment.trim()) {
+        setComments(prev => [
+          ...prev,
+          {
+            text: newComment,
+            id: Date.now(),
+            timestamp: new Date().toLocaleString()
+          }
+        ]);
+        setNewComment("");
+      }
+    } else {
+      alert("Failed to save question");
+=======
   useEffect(() => {
     const fetchQuestions = async () => {
       setIsLoading(true);
@@ -113,8 +192,13 @@ export default function EventDetail() {
       console.error("Error submitting comment:", err);
     } finally {
       setIsLoading(false);
+>>>>>>> 2b1e4881ae6616b3a8568d732fa9da40df8958c7
     }
-  };
+  } catch (err) {
+    console.error("This is a problem", err);
+    alert("An error occurred while submitting your comment");
+  }
+};
 
   const handleInputChange = (commentId, value) => {
     setReplyInputs((prev) => ({ ...prev, [commentId]: value }));
