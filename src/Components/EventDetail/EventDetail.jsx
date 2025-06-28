@@ -9,7 +9,6 @@ import markerIcon from "leaflet/dist/images/marker-icon.png";
 import markerShadow from "leaflet/dist/images/marker-shadow.png";
 import RSVP from "../RSVP/RSVP";
 
-<<<<<<< HEAD
 
 // const { eventId } = useParams();
 //   const location = useLocation();
@@ -39,16 +38,13 @@ function formatTime(dateString) {
 }
 
 // Import marker images directly
-import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
-import markerIcon from 'leaflet/dist/images/marker-icon.png';
-import markerShadow from 'leaflet/dist/images/marker-shadow.png';
-import { useEffect } from "react";
+// import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
+// import markerIcon from 'leaflet/dist/images/marker-icon.png';
+// import markerShadow from 'leaflet/dist/images/marker-shadow.png';
+// import { useEffect } from "react";
 
 // Fix for default marker icons
-const defaultIcon = new L.Icon({
-=======
 const eventMarkerIcon = new L.Icon({
->>>>>>> 2b1e4881ae6616b3a8568d732fa9da40df8958c7
   iconRetinaUrl: markerIcon2x,
   iconUrl: markerIcon,
   shadowUrl: markerShadow,
@@ -58,16 +54,16 @@ const eventMarkerIcon = new L.Icon({
   shadowSize: [45, 45],
 });
 
-function formatTime(dateString) {
-  if (!dateString) return "";
-  const date = new Date(dateString);
-  let hours = date.getHours();
-  const minutes = date.getMinutes();
-  const ampm = hours >= 12 ? "PM" : "AM";
-  hours = hours % 12 || 12;
-  const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes;
-  return `${hours}:${formattedMinutes} ${ampm}`;
-}
+// function formatTime(dateString) {
+//   if (!dateString) return "";
+//   const date = new Date(dateString);
+//   let hours = date.getHours();
+//   const minutes = date.getMinutes();
+//   const ampm = hours >= 12 ? "PM" : "AM";
+//   hours = hours % 12 || 12;
+//   const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes;
+//   return `${hours}:${formattedMinutes} ${ampm}`;
+// }
 
 function formatDateWithOrdinal(dateString) {
   const date = new Date(dateString);
